@@ -1,0 +1,23 @@
+# dsh-xiaoba-brand bundle: mount the Node half so the Loader has a host row to
+# carry configuration into the browser, and ship the browser half through
+# exports["./client"].
+#
+# Every key below is optional — omit one to keep its default. The defaults
+# replace the DeepSeek brand with the bundled mark and the "LinHaoMing" wordmark.
+#
+#   sidebarMarkScale   multiply the sidebar mark; the slot asks for 24px
+#   heroMarkScale      multiply the hero mark; the slot asks for 34px
+#   wordmarkScale      multiply the "name + HARNESS badge" wordmark
+#   headline           hero headline; empty string keeps the stock copy
+#   previewBadge       hero badge; empty string keeps the stock copy
+#   sourceHeadline     stock hero headline this plugin rewrites
+#   sourcePreviewBadge stock hero badge this plugin rewrites
+- insert:
+    - id: dsh-xiaoba-brand
+      name: 'dsh-xiaoba-brand'
+      config:
+        sidebarMarkScale: 1.5
+        heroMarkScale: 2
+        wordmarkScale: 1.5
+        headline: '林浩铭智能助手'
+        previewBadge: '小八版'
