@@ -55,9 +55,16 @@ out += `];\n\n`;
 
 out += read("src/client.template.js");
 
+// The browser half must arrive as the factory-form CJS the client module system
+// registers: the bundle is executed as a classic script, and executing it may
+// only REGISTER a factory (window.__ModuleLoader__.load({id, factory})). Emitting
+// the template body bare made the browser throw "require is not defined" at the
+// first `var React = require("react")` line, which fails the whole web boot.
+const wrapped = `window.__ModuleLoader__.load({\n\tid: ${json(id)},\n\tfactory: (require) => {\n\t\tvar module = { exports: {} };\n\t\tvar exports = module.exports;\n${out}\n\t\treturn module.exports;\n\t}\n});\n`;
+
 mkdirSync(join(root, "lib"), { recursive: true });
-writeFileSync(join(root, "lib", "client.js"), out);
-console.log(`lib/client.js written (${out.length} bytes)`);
+writeFileSync(join(root, "lib", "client.js"), wrapped);
+console.log(`lib/client.js written (${wrapped.length} bytes)`);
 
 // The Node half has no generation step: it is plain ESM, copied verbatim so the
 // shipped lib/ matches src/ without a build tool in the loop.
