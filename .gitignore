@@ -1,3 +1,18 @@
 node_modules/
 *.log
 .DS_Store
+
+# local scratch
+_*
+
+# local agent/tooling scaffolding (not part of the plugin) — same policy as
+# dsh-session-namer. dsh-usage-bar keeps .trellis/spec/ because that repo's spec
+# is project knowledge referenced by its own tests; this repo's .trellis/ is the
+# generic Trellis template, so the whole tree stays local.
+.trellis/
+.agents/
+.dsh/
+AGENTS.md
+.gitattributes
+.tmp-*
+.diag*
