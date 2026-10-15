@@ -17,6 +17,7 @@
 import { readFileSync, writeFileSync, mkdirSync, copyFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { DEFAULTS } from "../src/brand-defaults.js";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const read = (p) => readFileSync(join(root, p), "utf8");
@@ -53,6 +54,9 @@ out += `var HARNESS_GLYPHS = [\n`;
 for (const d of badge) out += `  ${json(d)},\n`;
 out += `];\n\n`;
 
+out += "var XIAOBA_DEFAULTS = " + json(DEFAULTS) + ";\n\n";
+
+
 out += read("src/client.template.js");
 
 // The browser half must arrive as the factory-form CJS the client module system
@@ -70,4 +74,7 @@ console.log(`lib/client.js written (${wrapped.length} bytes)`);
 // shipped lib/ matches src/ without a build tool in the loop.
 copyFileSync(join(root, "src", "index.js"), join(root, "lib", "index.js"));
 console.log("lib/index.js written");
+// host half 的 import 目标，必须跟着进 lib/。
+copyFileSync(join(root, "src", "brand-defaults.js"), join(root, "lib", "brand-defaults.js"));
+console.log("lib/brand-defaults.js written");
 

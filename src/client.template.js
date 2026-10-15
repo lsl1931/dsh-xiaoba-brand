@@ -28,21 +28,8 @@ var NS = "dsh-xiaoba-brand";
 // Configuration
 // ---------------------------------------------------------------------------
 
-/** Defaults applied when the Host injects nothing or a partial object. */
-var DEFAULTS = {
-  // Mark scale multipliers. The slot hands the mark a nominal size (24 in the
-  // sidebar, 34 in the hero); these grow it from that baseline.
-  sidebarMarkScale: 1.5,
-  heroMarkScale: 2,
-  wordmarkScale: 1.5,
-  // Hero copy. Empty strings leave the stock text untouched.
-  headline: "",
-  previewBadge: "",
-  // Stock hero strings this plugin rewrites. Change these only if the upstream
-  // default copy changes.
-  sourceHeadline: "探索未至之境",
-  sourcePreviewBadge: "预览版"
-};
+/** DEFAULTS 由 tools/build.mjs 从 src/brand-defaults.js 生成，禁止在此手抄（会漂移）。 */
+var DEFAULTS = XIAOBA_DEFAULTS;
 
 function readConfig() {
   var injected = typeof globalThis === "undefined" ? undefined : globalThis.__DSH_XIAOBA_BRAND__;
@@ -155,17 +142,43 @@ function XiaobaWordmark(props) {
 // stable _titleGroup suffix and the copy by exact text.
 // ---------------------------------------------------------------------------
 
+/** 命中规则：只在上游原文精确匹配时替换，绝不做子串匹配。 */
+function heroReplacement(text, config) {
+  if (config.headline !== "" && text === config.sourceHeadline) return config.headline;
+  if (config.previewBadge !== "" && text === config.sourcePreviewBadge) return config.previewBadge;
+  return undefined;
+}
+
+/** 未命中告警只报一次：MutationObserver 会反复调用 patchHeroCopy。 */
+var warnedHeroMiss = false;
+
 function patchHeroCopy() {
   if (typeof document === "undefined") return;
   if (CONFIG.headline === "" && CONFIG.previewBadge === "") return;
   var groups = document.querySelectorAll("[class*='_titleGroup']");
+  var hits = 0;
   for (var g = 0; g < groups.length; g += 1) {
     var nodes = groups[g].querySelectorAll("span");
     for (var i = 0; i < nodes.length; i += 1) {
       var el = nodes[i];
       if (el.children.length !== 0) continue;
-      if (CONFIG.headline !== "" && el.textContent === CONFIG.sourceHeadline) el.textContent = CONFIG.headline;
-      else if (CONFIG.previewBadge !== "" && el.textContent === CONFIG.sourcePreviewBadge) el.textContent = CONFIG.previewBadge;
+      var next = heroReplacement(el.textContent, CONFIG);
+      if (next !== undefined) {
+        el.textContent = next;
+        hits += 1;
+      }
+    }
+  }
+  // 上游改了文案、或改了 _titleGroup 锚点时一个都不会命中 —— 品牌静默消失是最难
+  // 排查的故障，所以显式报一次（去重，避免 MutationObserver 刷屏）。
+  if (groups.length > 0 && hits === 0 && warnedHeroMiss === false) {
+    warnedHeroMiss = true;
+    if (typeof console !== "undefined" && console.warn) {
+      console.warn(
+        NS + ": hero 文案未命中，品牌替换未生效 —— 上游文案或 _titleGroup 锚点可能已变更。" +
+        " 期望 " + JSON.stringify([CONFIG.sourceHeadline, CONFIG.sourcePreviewBadge]) +
+        "，锚点数 " + groups.length
+      );
     }
   }
 }
@@ -258,3 +271,14 @@ function apply(ctx) {
 
 exports.inject = inject;
 exports.apply = apply;
+
+// 仅供离线自检使用（不参与运行时逻辑）。
+exports.__test = {
+  DEFAULTS: DEFAULTS,
+  NS: NS,
+  readConfig: readConfig,
+  heroReplacement: heroReplacement,
+  patchHeroCopy: patchHeroCopy,
+  CSS: CSS,
+  STYLE_ID: STYLE_ID
+};
