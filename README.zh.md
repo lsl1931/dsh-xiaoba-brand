@@ -170,11 +170,22 @@ node --check lib/client.js
 
 - `src/client.template.js` — 浏览器半的源码（配置、插槽接线、DOM 补丁、样式）
 - `src/index.js` — Node 半（校验并把配置注入页面）
+- `src/brand-defaults.js` — **默认值与取值规则的唯一来源**。两半都从它派生：Node 半直接
+  import，浏览器半拿到的是 `tools/build.mjs` 生成的同一份值（`XIAOBA_DEFAULTS`）。
+  以前两半各手抄一份，正是默认值会漂移的原因。
 - `tools/build.mjs` — 构建脚本，零依赖
 - `assets/` — 内联素材
 - `lib/` — **生成物，不要手改**
 
+```bash
+node tools/build.mjs            # 重新生成 lib/（逐字节可复现）
+node selftest-xiaoba-brand.mjs  # 离线自检：默认值对齐、取值规则、hero 命中、未命中告警
+```
+
 **零运行时依赖**：插件不 import 任何内核包，因此可以用普通的 `link:` 安装。
+
+**失效是可见的**：上游文案或 `_titleGroup` 锚点变更时，DOM 补丁一个都不命中，会输出一次
+`console.warn`，而不是让品牌静默消失。
 
 ## 兼容性
 
