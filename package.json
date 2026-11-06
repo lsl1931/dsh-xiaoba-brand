@@ -55,5 +55,9 @@
   "homepage": "https://github.com/lsl1931/dsh-xiaoba-brand#readme",
   "bugs": {
     "url": "https://github.com/lsl1931/dsh-xiaoba-brand/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }
