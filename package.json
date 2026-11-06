@@ -1,11 +1,12 @@
 {
   "name": "dsh-xiaoba-brand",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "DSH Web 品牌替换插件：把侧栏与欢迎页的 DeepSeek 标志替换为自定义形象与字标，并改写 hero 文案。所有项均可通过 cordis.patch.yml 配置。",
   "type": "module",
   "main": "lib/index.js",
   "files": [
     "lib",
+    "locale",
     "cordis.patch.yml",
     "README.md",
     "README.zh.md",
@@ -16,6 +17,7 @@
       "default": "./lib/index.js"
     },
     "./client": "./lib/client.js",
+    "./locale/*.json": "./locale/*.json",
     "./package.json": "./package.json"
   },
   "dsh": {
